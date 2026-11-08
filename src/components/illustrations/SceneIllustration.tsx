@@ -16,7 +16,7 @@ export function SceneIllustration({
   customData,
   className = "w-full h-full",
 }: Props) {
-  const [imgError, setImgError] = useState(false);
+  const [failedPath, setFailedPath] = useState<string | null>(null);
 
   // If scene "99" and custom data provided
   if (sceneId === "99" && customData) {
@@ -39,14 +39,14 @@ export function SceneIllustration({
   }
 
   // If an imagePath is specified and has not failed loading
-  if (imagePath && !imgError) {
+  if (imagePath && failedPath !== imagePath) {
     return (
       <div className={`relative w-full h-full overflow-hidden bg-stone-900 ${className}`}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imagePath}
           alt={`Scena ${sceneId}`}
-          onError={() => setImgError(true)}
+          onError={() => setFailedPath(imagePath)}
           className="w-full h-full object-cover sepia-[0.15] contrast-[1.05]"
         />
         {/* Subtle vintage vignette & grain */}

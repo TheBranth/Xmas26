@@ -119,6 +119,7 @@ export function MasterDashboard() {
 
             <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-stone-950 border border-stone-800 shadow-inner">
               <SceneIllustration
+                key={`${state.currentSceneId}_${activeScene.imagePath}`}
                 sceneId={state.currentSceneId}
                 imagePath={activeScene.imagePath}
                 customData={state.customScene}

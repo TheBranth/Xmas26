@@ -70,6 +70,7 @@ export function PlayerGameView() {
       <section className="relative h-[38%] w-full flex-shrink-0 bg-stone-900 overflow-hidden shadow-lg border-b-2 border-amber-900/40">
         {/* Active Scene Illustration */}
         <SceneIllustration
+          key={`${state.currentSceneId}_${currentScene.imagePath}`}
           sceneId={state.currentSceneId}
           imagePath={currentScene.imagePath}
           customData={state.customScene}
