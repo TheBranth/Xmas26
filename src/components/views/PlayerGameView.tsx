@@ -7,7 +7,7 @@ import { SCENES } from "@/data/scenes";
 import { StatKey } from "@/types/game";
 import { SceneIllustration } from "@/components/illustrations/SceneIllustration";
 import { SnowEffect } from "@/components/effects/SnowEffect";
-import { Cookie, Sparkles, Gift, X } from "lucide-react";
+import { Cookie, Sparkles, Gift, X, AlertTriangle } from "lucide-react";
 
 export function PlayerGameView() {
   const { state, myCharacterId, playerName, rollDice, drawBelt } = useGame();
