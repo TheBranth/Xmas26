@@ -97,9 +97,9 @@ function MasterGate() {
               href="/"
               className="inline-flex items-center gap-1 hover:text-amber-300 transition"
             >
-              <ArrowLeft className="w-3 h-3" /> Vista Giocatori
+              <ArrowLeft className="w-3 h-3" /> Torna alla Vista Giocatori
             </Link>
-            <span className="italic text-stone-500">Hint: imodium</span>
+            <span className="text-[10px] text-stone-600 font-mono">ON AIR • REGIA</span>
           </div>
         </div>
       </main>

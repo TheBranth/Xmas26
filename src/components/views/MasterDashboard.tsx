@@ -5,7 +5,6 @@ import { useGame } from "@/context/GameContext";
 import { SCENES, PHASES } from "@/data/scenes";
 import { CHARACTERS } from "@/data/characters";
 import { GameScene } from "@/types/game";
-import { DisasterClock } from "@/components/master/DisasterClock";
 import { SceneIllustration } from "@/components/illustrations/SceneIllustration";
 import {
   Sparkles,
@@ -26,7 +25,6 @@ export function MasterDashboard() {
     state,
     setScene,
     setCustomScene,
-    setClock,
     modifyCookie,
     drawBelt,
     setStatus,
@@ -136,9 +134,6 @@ export function MasterDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Orologio del Disastro */}
-          <DisasterClock clock={state.disasterClock} onChangeClock={setClock} />
 
           {/* Attiva Cintura di Babbo Natale Action */}
           <div className="bg-gradient-to-br from-amber-950/70 via-stone-900 to-amber-950/70 border-2 border-amber-500/70 rounded-3xl p-5 shadow-xl text-center">
@@ -286,7 +281,7 @@ export function MasterDashboard() {
               </div>
 
               {/* Grid of subphase cards (for phases 1, 2, 3, 4 and scene 98) */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[520px] overflow-y-auto pr-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {subScenes
                   .filter((s) => s.id !== "99")
                   .map((scene) => {
