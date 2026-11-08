@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useGame } from "@/context/GameContext";
 import { CHARACTERS, STAT_LABELS } from "@/data/characters";
 import { Character } from "@/types/game";
 import { CharacterSilhouette } from "@/components/illustrations/CharacterSilhouette";
-import { Lock, Check, User, Sparkles, AlertTriangle, ShieldCheck, Play, RotateCcw } from "lucide-react";
+import { Lock, User, Sparkles, ShieldCheck, Play, RotateCcw } from "lucide-react";
 
 export function LobbyView() {
   const {
@@ -25,22 +25,15 @@ export function LobbyView() {
 
   const [previewChar, setPreviewChar] = useState<Character | null>(null);
 
-  // If currently inspecting a character and that character gets locked by someone else, kick out!
-  useEffect(() => {
-    if (previewChar) {
-      const lock = state.characterLocks[previewChar.id];
-      if (lock && lock.playerId !== playerId) {
-        setPreviewChar(null);
-      }
+  // Compute displayed preview character cleanly without triggering setState inside effects
+  const displayedPreviewChar = useMemo(() => {
+    if (!previewChar || kickOutNotice) return null;
+    const lock = state.characterLocks[previewChar.id];
+    if (lock && lock.playerId !== playerId) {
+      return null;
     }
-  }, [state.characterLocks, previewChar, playerId]);
-
-  // If kickout notice arrives, ensure preview is closed
-  useEffect(() => {
-    if (kickOutNotice) {
-      setPreviewChar(null);
-    }
-  }, [kickOutNotice]);
+    return previewChar;
+  }, [previewChar, kickOutNotice, state.characterLocks, playerId]);
 
   const myCharacter = CHARACTERS.find((c) => c.id === myCharacterId);
 
@@ -122,9 +115,17 @@ export function LobbyView() {
                   : "border-stone-700 hover:border-amber-500/70 hover:scale-[1.02] shadow-lg"
               }`}
             >
-              {/* Silhouette Stage */}
-              <div className="relative w-full h-44 rounded-2xl overflow-hidden bg-stone-950/70 border border-stone-800/80 mb-3 flex items-center justify-center">
-                <CharacterSilhouette characterId={char.id} className="w-full h-full p-2" />
+              {/* Archetype Illustration Stage */}
+              <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-stone-950/70 border border-stone-800/80 mb-3 flex items-center justify-center">
+                {char.imagePath ? (
+                  <img
+                    src={char.imagePath}
+                    alt={char.name}
+                    className="w-full h-full object-cover object-top transition-transform duration-300 group-hover:scale-105"
+                  />
+                ) : (
+                  <CharacterSilhouette characterId={char.id} className="w-full h-full p-2" />
+                )}
 
                 {/* Lock Status Badge */}
                 {lock && (
@@ -228,18 +229,26 @@ export function LobbyView() {
       )}
 
       {/* Character Inspection & Claim Modal */}
-      {previewChar && (
+      {displayedPreviewChar && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="relative w-full max-w-lg bg-stone-900 border-2 border-stone-700 rounded-3xl p-5 shadow-2xl text-stone-100 max-h-[90vh] overflow-y-auto">
-            {/* Silhouette stage in modal */}
-            <div className="relative w-full h-48 rounded-2xl bg-stone-950 border border-stone-800 mb-4 flex items-center justify-center overflow-hidden">
-              <CharacterSilhouette characterId={previewChar.id} className="w-full h-full p-2" />
+            {/* Archetype Illustration stage in modal */}
+            <div className="relative w-full h-64 rounded-2xl bg-stone-950 border border-stone-800 mb-4 flex items-center justify-center overflow-hidden">
+              {displayedPreviewChar.imagePath ? (
+                <img
+                  src={displayedPreviewChar.imagePath}
+                  alt={displayedPreviewChar.name}
+                  className="w-full h-full object-cover object-top"
+                />
+              ) : (
+                <CharacterSilhouette characterId={displayedPreviewChar.id} className="w-full h-full p-2" />
+              )}
             </div>
 
             <div className="flex items-start justify-between">
               <div>
-                <h2 className="text-2xl font-black text-amber-100">{previewChar.name}</h2>
-                <p className="text-xs text-stone-400 mt-0.5">{previewChar.subtitle}</p>
+                <h2 className="text-2xl font-black text-amber-100">{displayedPreviewChar.name}</h2>
+                <p className="text-xs text-stone-400 mt-0.5">{displayedPreviewChar.subtitle}</p>
               </div>
               <button
                 onClick={() => setPreviewChar(null)}
@@ -251,14 +260,14 @@ export function LobbyView() {
 
             {/* Silhouette description note */}
             <p className="text-xs text-stone-300 italic mt-2 bg-stone-950/60 p-2.5 rounded-xl border border-stone-800/80">
-              &ldquo;{previewChar.silhouetteDesc}&rdquo;
+              &ldquo;{displayedPreviewChar.silhouetteDesc}&rdquo;
             </p>
 
             {/* Stats */}
             <div className="mt-4">
               <h4 className="text-xs uppercase font-bold text-amber-400 mb-2">Statistiche</h4>
               <div className="grid grid-cols-2 gap-2">
-                {Object.entries(previewChar.stats).map(([k, val]) => (
+                {Object.entries(displayedPreviewChar.stats).map(([k, val]) => (
                   <div
                     key={k}
                     className="p-2.5 rounded-xl bg-stone-950/60 border border-stone-800 flex items-center justify-between"
@@ -280,7 +289,7 @@ export function LobbyView() {
                 Specialità (+1d6 se coerente con l&apos;azione)
               </h4>
               <div className="flex flex-wrap gap-1.5">
-                {previewChar.specialties.map((spec) => (
+                {displayedPreviewChar.specialties.map((spec) => (
                   <span
                     key={spec}
                     className="text-xs px-3 py-1 rounded-full bg-emerald-950/70 text-emerald-200 border border-emerald-700/50 font-medium"
@@ -297,7 +306,7 @@ export function LobbyView() {
                 Tratti Negativi (-1d6, ma guadagni 1 Biscotto del Cringe!)
               </h4>
               <div className="flex flex-wrap gap-1.5">
-                {previewChar.negativeTraits.map((neg) => (
+                {displayedPreviewChar.negativeTraits.map((neg) => (
                   <span
                     key={neg}
                     className="text-xs px-3 py-1 rounded-full bg-rose-950/70 text-rose-200 border border-rose-700/50 font-medium"
@@ -311,29 +320,29 @@ export function LobbyView() {
             {/* Iconic Item */}
             <div className="mt-4 p-3 rounded-xl bg-stone-950/60 border border-stone-800">
               <h4 className="text-xs uppercase font-bold text-amber-400 mb-1">Oggetto Iconico</h4>
-              <p className="text-xs text-stone-300 font-medium">{previewChar.iconicItem}</p>
+              <p className="text-xs text-stone-300 font-medium">{displayedPreviewChar.iconicItem}</p>
             </div>
 
             {/* Claim / Release Action */}
             <div className="mt-6 pt-4 border-t border-stone-800 flex items-center gap-2">
-              {state.characterLocks[previewChar.id]?.playerId === playerId ? (
+              {state.characterLocks[displayedPreviewChar.id]?.playerId === playerId ? (
                 <button
                   onClick={() => {
-                    unlockCharacter(previewChar.id);
+                    unlockCharacter(displayedPreviewChar.id);
                     setPreviewChar(null);
                   }}
                   className="w-full py-3 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 font-bold text-xs border border-stone-600 transition"
                 >
                   Rilascia questa scheda
                 </button>
-              ) : state.characterLocks[previewChar.id] ? (
+              ) : state.characterLocks[displayedPreviewChar.id] ? (
                 <div className="w-full py-3 rounded-xl bg-stone-800/80 text-stone-400 font-bold text-xs text-center border border-stone-700 flex items-center justify-center gap-2">
-                  <Lock className="w-3.5 h-3.5" /> Reclamato da {state.characterLocks[previewChar.id].playerName}
+                  <Lock className="w-3.5 h-3.5" /> Reclamato da {state.characterLocks[displayedPreviewChar.id].playerName}
                 </div>
               ) : (
                 <button
                   onClick={() => {
-                    lockCharacter(previewChar.id);
+                    lockCharacter(displayedPreviewChar.id);
                     setPreviewChar(null);
                   }}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 font-black text-stone-950 text-xs uppercase tracking-wider shadow-lg transition active:scale-95"

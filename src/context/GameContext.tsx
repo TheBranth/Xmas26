@@ -10,6 +10,7 @@ import {
   StatKey,
   KickOutEvent,
 } from "@/types/game";
+import { CHARACTERS } from "@/data/characters";
 import { sounds } from "@/utils/audio";
 
 const DEFAULT_STATE: RoomState = {
@@ -58,7 +59,7 @@ interface GameContextType {
     negativeTraitUsed?: string | null;
     spentCookie: boolean;
   }) => void;
-  drawBelt: () => void;
+  drawBelt: (customItem?: string) => void;
   clearOverlays: () => void;
 }
 
@@ -66,34 +67,28 @@ const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<RoomState>(DEFAULT_STATE);
-  const [playerId, setPlayerId] = useState<string>("");
-  const [playerName, setPlayerName] = useState<string>("");
-  const [isMaster, setIsMaster] = useState<boolean>(false);
-  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
-  const [kickOutNotice, setKickOutNotice] = useState<KickOutEvent | null>(null);
-
-  const socketRef = useRef<PartySocket | null>(null);
-
-  // Initialize or restore player ID & name
-  useEffect(() => {
+  const [playerId] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
     let pid = localStorage.getItem("ons_player_id");
     if (!pid) {
       pid = "p_" + Math.random().toString(36).substring(2, 9);
       localStorage.setItem("ons_player_id", pid);
     }
-    setPlayerId(pid);
+    return pid;
+  });
+  const [playerName, setPlayerName] = useState<string>(() => {
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem("ons_player_name") || "Giocatore";
+  });
+  const [isMaster, setIsMaster] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    const url = new URL(window.location.href);
+    return url.searchParams.get("role") === "master" || url.pathname.includes("/master");
+  });
+  const [connectionStatus, setConnectionStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
+  const [kickOutNotice, setKickOutNotice] = useState<KickOutEvent | null>(null);
 
-    const savedName = localStorage.getItem("ons_player_name") || "Giocatore";
-    setPlayerName(savedName);
-
-    // Check if query param specifies master
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (url.searchParams.get("role") === "master" || url.pathname.includes("/master")) {
-        setIsMaster(true);
-      }
-    }
-  }, []);
+  const socketRef = useRef<PartySocket | null>(null);
 
   const handleSetPlayerName = (name: string) => {
     setPlayerName(name);
@@ -155,12 +150,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       });
 
+      ws.addEventListener("error", () => {
+        setConnectionStatus("disconnected");
+      });
+
       return () => {
         ws.close();
       };
     } catch (err) {
       console.warn("PartySocket connection failed, running in resilient local state", err);
-      setConnectionStatus("disconnected");
+      queueMicrotask(() => setConnectionStatus("disconnected"));
     }
   }, [playerId]);
 
@@ -274,8 +273,16 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const drawBelt = () => {
-    send({ type: "DRAW_BELT" });
+  const drawBelt = (customItem?: string) => {
+    const myChar = CHARACTERS.find((c) => c.id === myCharacterId);
+    send({
+      type: "DRAW_BELT",
+      item: customItem,
+      playerId,
+      playerName: playerName || (isMaster ? "Master" : "Giocatore"),
+      characterId: myChar?.id,
+      characterName: myChar?.name,
+    });
   };
 
   const clearOverlays = () => {

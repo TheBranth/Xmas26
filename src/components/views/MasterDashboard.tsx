@@ -16,10 +16,8 @@ import {
   Cookie,
   Image as ImageIcon,
   Send,
-  Eye,
   Radio,
   RadioTower,
-  Sliders,
   CheckCircle2,
 } from "lucide-react";
 
@@ -43,6 +41,7 @@ export function MasterDashboard() {
   const [customTitle, setCustomTitle] = useState("");
   const [customUrl, setCustomUrl] = useState("");
   const [applyFilter, setApplyFilter] = useState(true);
+  const [masterBeltItem, setMasterBeltItem] = useState("");
 
   const handleProjectCustomScene = (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,11 +148,23 @@ export function MasterDashboard() {
             <h3 className="text-lg font-black text-amber-200">
               Cintura di Babbo Natale
             </h3>
-            <p className="text-xs text-stone-300 mt-1 mb-4">
-              Estrae un oggetto assurdo + penitenza cringe festiva dal vivo per tutti i giocatori.
+            <p className="text-xs text-stone-300 mt-1 mb-3">
+              I giocatori scelgono l&apos;oggetto, la penitenza cringe dal vivo è estratta a sorte!
             </p>
+            <div className="mb-3 text-left">
+              <input
+                type="text"
+                value={masterBeltItem}
+                onChange={(e) => setMasterBeltItem(e.target.value)}
+                placeholder="Oggetto richiesto (es. Mentina distruttiva)..."
+                className="w-full bg-stone-950/90 border border-amber-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-400"
+              />
+            </div>
             <button
-              onClick={drawBelt}
+              onClick={() => {
+                drawBelt(masterBeltItem);
+                setMasterBeltItem("");
+              }}
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-stone-950 font-black text-sm uppercase tracking-wider shadow-lg active:scale-95 transition flex items-center justify-center gap-2"
             >
               <Sparkles className="w-4 h-4" /> Pescata Cintura & Penitenza

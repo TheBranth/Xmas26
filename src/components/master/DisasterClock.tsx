@@ -7,6 +7,16 @@ interface Props {
   interactive?: boolean;
 }
 
+// Static 6-slice SVG paths precalculated with fixed precision to prevent any SSR hydration mismatch
+const SLICE_PATHS = [
+  "M 50 50 L 92.000 50.000 A 42 42 0 0 1 71.000 86.373 Z",
+  "M 50 50 L 71.000 86.373 A 42 42 0 0 1 29.000 86.373 Z",
+  "M 50 50 L 29.000 86.373 A 42 42 0 0 1 8.000 50.000 Z",
+  "M 50 50 L 8.000 50.000 A 42 42 0 0 1 29.000 13.627 Z",
+  "M 50 50 L 29.000 13.627 A 42 42 0 0 1 71.000 13.627 Z",
+  "M 50 50 L 71.000 13.627 A 42 42 0 0 1 92.000 50.000 Z",
+];
+
 export function DisasterClock({ clock, onChangeClock, interactive = true }: Props) {
   const slices = [0, 1, 2, 3, 4, 5];
 
@@ -31,20 +41,13 @@ export function DisasterClock({ clock, onChangeClock, interactive = true }: Prop
       <div className="relative w-28 h-28 my-1">
         <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
           {slices.map((idx) => {
-            const startAngle = (idx * 60 * Math.PI) / 180;
-            const endAngle = ((idx + 1) * 60 * Math.PI) / 180;
-            const x1 = 50 + 42 * Math.cos(startAngle);
-            const y1 = 50 + 42 * Math.sin(startAngle);
-            const x2 = 50 + 42 * Math.cos(endAngle);
-            const y2 = 50 + 42 * Math.sin(endAngle);
-
             const isFilled = idx < clock;
             const isDanger = clock >= 5;
 
             return (
               <path
                 key={idx}
-                d={`M 50 50 L ${x1} ${y1} A 42 42 0 0 1 ${x2} ${y2} Z`}
+                d={SLICE_PATHS[idx]}
                 className={`transition-colors duration-300 stroke-stone-900 stroke-2 ${
                   isFilled
                     ? isDanger

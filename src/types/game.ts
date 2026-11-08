@@ -18,6 +18,7 @@ export interface Character {
   specialties: string[];
   negativeTraits: string[];
   iconicItem: string;
+  imagePath?: string;
   colorScheme: {
     primary: string;
     border: string;
@@ -76,6 +77,10 @@ export interface BeltDrawResult {
   id: string;
   item: string;
   dare: string;
+  playerId?: string;
+  playerName?: string;
+  characterId?: string;
+  characterName?: string;
   timestamp: number;
 }
 
@@ -122,7 +127,14 @@ export type ClientMessage =
       negativeTraitUsed?: string | null;
       spentCookie: boolean;
     }
-  | { type: "DRAW_BELT" }
+  | {
+      type: "DRAW_BELT";
+      item?: string;
+      playerId?: string;
+      playerName?: string;
+      characterId?: string;
+      characterName?: string;
+    }
   | { type: "CLEAR_OVERLAYS" };
 
 // Server -> Client messages

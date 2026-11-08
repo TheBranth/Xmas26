@@ -228,12 +228,21 @@ export default class GameRoom implements Party.Server {
 
         case "DRAW_BELT": {
           const randomIndex = Math.floor(Math.random() * BELT_ITEMS.length);
-          const item = BELT_ITEMS[randomIndex];
+          const randomBeltItem = BELT_ITEMS[randomIndex];
+          const dare = randomBeltItem.dare;
+          const chosenItem =
+            data.item && data.item.trim().length > 0
+              ? data.item.trim()
+              : randomBeltItem.item;
 
           const drawResult: BeltDrawResult = {
             id: `belt_${Date.now()}`,
-            item: item.item,
-            dare: item.dare,
+            item: chosenItem,
+            dare: dare,
+            playerId: data.playerId,
+            playerName: data.playerName,
+            characterId: data.characterId,
+            characterName: data.characterName,
             timestamp: Date.now(),
           };
 

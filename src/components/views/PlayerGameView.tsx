@@ -7,10 +7,13 @@ import { SCENES } from "@/data/scenes";
 import { StatKey } from "@/types/game";
 import { SceneIllustration } from "@/components/illustrations/SceneIllustration";
 import { SnowEffect } from "@/components/effects/SnowEffect";
-import { Cookie, Sparkles, AlertTriangle, Flame, ShieldAlert } from "lucide-react";
+import { Cookie, Sparkles, Gift, X } from "lucide-react";
 
 export function PlayerGameView() {
-  const { state, myCharacterId, playerName, rollDice } = useGame();
+  const { state, myCharacterId, playerName, rollDice, drawBelt } = useGame();
+
+  const [isBeltModalOpen, setIsBeltModalOpen] = useState(false);
+  const [customBeltItem, setCustomBeltItem] = useState("");
 
   const character = CHARACTERS.find((c) => c.id === myCharacterId) || CHARACTERS[0];
   const currentScene =
@@ -81,8 +84,16 @@ export function PlayerGameView() {
 
         {/* Top Row: Character Name & Cringe Cookies Badge */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-20">
-          <div className="bg-stone-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-stone-700/60 flex items-center gap-1.5 shadow-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-stone-700/60 flex items-center gap-2 shadow-md">
+            {character.imagePath ? (
+              <img
+                src={character.imagePath}
+                alt={character.name}
+                className="w-5 h-5 rounded-full object-cover object-top ring-1 ring-amber-400/80"
+              />
+            ) : (
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            )}
             <span className="text-[11px] font-bold text-stone-200">
               {character.name} <span className="text-stone-400 font-normal">({playerName})</span>
             </span>
@@ -270,7 +281,90 @@ export function PlayerGameView() {
             {STAT_LABELS[selectedStat]?.label}
           </span>
         </button>
+
+        {/* Santa Belt Trigger Button */}
+        <button
+          type="button"
+          onClick={() => setIsBeltModalOpen(true)}
+          className="w-full py-2 rounded-xl bg-gradient-to-r from-red-950/90 via-amber-950/70 to-red-950/90 hover:from-red-900 hover:to-red-900 text-amber-200 border border-amber-500/40 text-xs font-bold shadow flex items-center justify-center gap-2 active:scale-95 transition"
+        >
+          <Gift className="w-4 h-4 text-amber-400" />
+          <span>Cintura di Babbo Natale (Estrai Oggetto & Penitenza)</span>
+        </button>
       </section>
+
+      {/* Cintura di Babbo Natale Modal */}
+      {isBeltModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fadeIn">
+          <div className="relative w-full max-w-sm bg-gradient-to-b from-stone-900 via-stone-900 to-amber-950 border-2 border-amber-500 rounded-3xl p-5 shadow-2xl text-stone-100">
+            <button
+              onClick={() => setIsBeltModalOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full bg-stone-800 text-stone-400 hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="text-center mb-3">
+              <div className="inline-flex p-2.5 rounded-xl bg-amber-500/20 text-amber-400 mb-1">
+                <Gift className="w-6 h-6 animate-bounce" />
+              </div>
+              <h3 className="text-lg font-black text-amber-200">
+                Cintura di Babbo Natale
+              </h3>
+              <p className="text-[11px] text-stone-400 mt-0.5">
+                Scegli che oggetto magico/assurdo estrarre. La penitenza cringe festiva sarà estratta a sorte!
+              </p>
+            </div>
+
+            {/* Quick Presets */}
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {[
+                "🍬 Mentina distruttiva",
+                "❄️ Spray scongelante al ribes",
+                "🪝 Rampino di zucchero filato",
+                "🔦 Torcia stroboscopica",
+              ].map((preset) => (
+                <button
+                  key={preset}
+                  type="button"
+                  onClick={() => setCustomBeltItem(preset.replace(/^[^\s]+\s/, ""))}
+                  className="text-[11px] px-2.5 py-1 rounded-lg bg-stone-800/80 hover:bg-amber-950/60 border border-stone-700/60 hover:border-amber-500/50 text-stone-200 transition"
+                >
+                  {preset}
+                </button>
+              ))}
+            </div>
+
+            {/* Custom Input */}
+            <div className="mb-4">
+              <label className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">
+                Oggetto desiderato:
+              </label>
+              <input
+                type="text"
+                value={customBeltItem}
+                onChange={(e) => setCustomBeltItem(e.target.value)}
+                placeholder="Es. Una mentina distruttiva, dinamite di marzapane..."
+                className="w-full bg-stone-950/90 border border-amber-500/40 rounded-xl px-3 py-2 text-xs text-white placeholder-stone-500 focus:outline-none focus:border-amber-400"
+                maxLength={60}
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                drawBelt(customBeltItem);
+                setIsBeltModalOpen(false);
+                setCustomBeltItem("");
+              }}
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-stone-950 font-black text-xs uppercase tracking-wider shadow-lg active:scale-95 transition flex items-center justify-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Estrai Oggetto & Penitenza! 🎁</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

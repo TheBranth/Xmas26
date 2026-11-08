@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { GameProvider, useGame } from "@/context/GameContext";
 import { LobbyView } from "@/components/views/LobbyView";
 import { PlayerGameView } from "@/components/views/PlayerGameView";

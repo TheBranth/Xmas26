@@ -23,6 +23,7 @@ export const CHARACTERS: Character[] = [
       "Overthinking Paralizzante",
     ],
     iconicItem: "Puntatore laser astronomico e rotolo di nastro americano.",
+    imagePath: "/characters/secchione.webp",
     colorScheme: {
       primary: "from-blue-700 to-indigo-900",
       border: "border-blue-400/40",
@@ -51,6 +52,7 @@ export const CHARACTERS: Character[] = [
       "Zero Concetti Astratti",
     ],
     iconicItem: "Shaker pieno di pre-workout fluorescente di dubbia legalità.",
+    imagePath: "/characters/palestrato.webp",
     colorScheme: {
       primary: "from-amber-700 to-red-900",
       border: "border-amber-400/40",
@@ -79,6 +81,7 @@ export const CHARACTERS: Character[] = [
       "Sindrome da Protagonista",
     ],
     iconicItem: "Accendino griffato e bomboletta XXL di lacca extra-forte.",
+    imagePath: "/characters/squinza.webp",
     colorScheme: {
       primary: "from-pink-700 to-purple-900",
       border: "border-pink-400/40",
@@ -107,6 +110,7 @@ export const CHARACTERS: Character[] = [
       "Fascino della Cazzata",
     ],
     iconicItem: "Cassa Bluetooth con bassi distorsivi e coltellino multiuso \"trovato per terra\".",
+    imagePath: "/characters/maranza.webp",
     colorScheme: {
       primary: "from-emerald-700 to-teal-900",
       border: "border-emerald-400/40",

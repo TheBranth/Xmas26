@@ -42,7 +42,17 @@ export function SantaBeltOverlay({ draw, onClose }: Props) {
               <Sparkles className="w-5 h-5" /> Cintura di Babbo Natale <Sparkles className="w-5 h-5" />
             </h2>
             <p className="text-xs text-stone-400">
-              Il Master ha pescato dai meandri della fibbia d&apos;oro!
+              {draw.characterName ? (
+                <span>
+                  <strong className="text-amber-300">{draw.characterName}</strong> ({draw.playerName || "Giocatore"}) ha pescato dalla fibbia d&apos;oro!
+                </span>
+              ) : draw.playerName ? (
+                <span>
+                  <strong className="text-amber-300">{draw.playerName}</strong> ha pescato dalla fibbia d&apos;oro!
+                </span>
+              ) : (
+                "Qualcuno ha aperto la fibbia d'oro di Babbo Natale!"
+              )}
             </p>
           </div>
 
