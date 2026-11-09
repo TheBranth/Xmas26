@@ -44,6 +44,12 @@ export default class GameRoom implements Party.Server {
     await this.room.storage.put("gameState", this.state);
   }
 
+  onRequest(req: Party.Request) {
+    return new Response(JSON.stringify({ ok: true, status: this.state.status }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   onConnect(conn: Party.Connection) {
     const msg: ServerMessage = {
       type: "STATE_SYNC",
