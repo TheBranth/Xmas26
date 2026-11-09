@@ -1,4 +1,4 @@
-import type * as Party from "partykit/server";
+import { Server, routePartykitRequest, type Connection } from "partyserver";
 import {
   RoomState,
   ClientMessage,
@@ -9,48 +9,42 @@ import {
 } from "../src/types/game";
 import { BELT_ITEMS } from "../src/data/belt";
 
-export default class GameRoom implements Party.Server {
-  room: Party.Room;
-  state: RoomState;
-
-  constructor(room: Party.Room) {
-    this.room = room;
-    this.state = {
-      status: "LOBBY",
-      currentSceneId: "1.1",
-      customScene: null,
-      characterLocks: {},
-      disasterClock: 0,
-      cookies: {
-        secchione: 1,
-        palestrato: 1,
-        squinza: 1,
-        maranza: 1,
-      },
-      lastRoll: null,
-      lastBeltDraw: null,
-      kickOutEvent: null,
-    };
-  }
+export class Main extends Server {
+  state: RoomState = {
+    status: "LOBBY",
+    currentSceneId: "1.1",
+    customScene: null,
+    characterLocks: {},
+    disasterClock: 0,
+    cookies: {
+      secchione: 1,
+      palestrato: 1,
+      squinza: 1,
+      maranza: 1,
+    },
+    lastRoll: null,
+    lastBeltDraw: null,
+    kickOutEvent: null,
+  };
 
   async onStart() {
-    const saved = await this.room.storage.get<RoomState>("gameState");
+    const saved = await this.ctx.storage.get<RoomState>("gameState");
     if (saved) {
       this.state = saved;
     }
   }
 
   async saveState() {
-    await this.room.storage.put("gameState", this.state);
+    await this.ctx.storage.put("gameState", this.state);
   }
 
-  onRequest(req: Party.Request) {
+  onRequest(req: Request) {
     return new Response(JSON.stringify({ ok: true, status: this.state.status }), {
       headers: { "Content-Type": "application/json" },
     });
   }
 
-  onConnect(conn: Party.Connection) {
+  onConnect(conn: Connection) {
     const msg: ServerMessage = {
       type: "STATE_SYNC",
       state: this.state,
@@ -63,11 +57,11 @@ export default class GameRoom implements Party.Server {
       type: "STATE_SYNC",
       state: this.state,
     };
-    this.room.broadcast(JSON.stringify(msg));
+    this.broadcast(JSON.stringify(msg));
     this.saveState();
   }
 
-  async onMessage(message: string, sender: Party.Connection) {
+  async onMessage(sender: Connection, message: string) {
     try {
       const data = JSON.parse(message) as ClientMessage;
 
@@ -238,7 +232,7 @@ export default class GameRoom implements Party.Server {
             type: "DICE_ROLLED",
             roll: rollResult,
           };
-          this.room.broadcast(JSON.stringify(rollMsg));
+          this.broadcast(JSON.stringify(rollMsg));
           this.broadcastState();
           break;
         }
@@ -269,7 +263,7 @@ export default class GameRoom implements Party.Server {
             type: "BELT_DRAWN",
             draw: drawResult,
           };
-          this.room.broadcast(JSON.stringify(beltMsg));
+          this.broadcast(JSON.stringify(beltMsg));
           this.broadcastState();
           break;
         }
@@ -286,3 +280,12 @@ export default class GameRoom implements Party.Server {
     }
   }
 }
+
+export default {
+  async fetch(request: Request, env: any): Promise<Response> {
+    return (
+      (await routePartykitRequest(request, env)) ||
+      new Response("Not Found", { status: 404 })
+    );
+  },
+};

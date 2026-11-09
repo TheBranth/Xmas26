@@ -40,6 +40,9 @@ yarn-error.log*
 # partykit local state
 .partykit/
 
+# wrangler / cloudflare state
+.wrangler/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
