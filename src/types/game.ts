@@ -58,7 +58,9 @@ export interface DiceRollResult {
   statName: string;
   statValue: number;
   specialtyUsed?: string | null;
+  specialtiesUsed?: string[];
   negativeTraitUsed?: string | null;
+  negativeTraitsUsed?: string[];
   spentCookie: boolean;
   diceCount: number;
   rolls: number[];
@@ -125,7 +127,9 @@ export type ClientMessage =
       statName: string;
       statValue: number;
       specialtyUsed?: string | null;
+      specialtiesUsed?: string[];
       negativeTraitUsed?: string | null;
+      negativeTraitsUsed?: string[];
       spentCookie: boolean;
     }
   | {

@@ -162,11 +162,19 @@ export default class GameRoom implements Party.Server {
         }
 
         case "ROLL_DICE": {
+          // Normalize specialties and negative traits arrays
+          const specialties =
+            data.specialtiesUsed ??
+            (data.specialtyUsed ? [data.specialtyUsed] : []);
+          const negativeTraits =
+            data.negativeTraitsUsed ??
+            (data.negativeTraitUsed ? [data.negativeTraitUsed] : []);
+
           // Calculate dice count:
-          // Formula: Stat + 1 (specialty) - 1 (negativeTrait) + 1 (cookie), min 1d6
+          // Formula: Stat + specialties - negativeTraits + cookie, min 1d6
           let count = data.statValue;
-          if (data.specialtyUsed) count += 1;
-          if (data.negativeTraitUsed) count -= 1;
+          count += specialties.length;
+          count -= negativeTraits.length;
           if (data.spentCookie) count += 1;
           count = Math.max(1, count);
 
@@ -175,9 +183,10 @@ export default class GameRoom implements Party.Server {
             this.state.cookies[data.characterId] -= 1;
           }
 
-          // If negative trait used, award +1 cookie!
-          if (data.negativeTraitUsed) {
-            this.state.cookies[data.characterId] = (this.state.cookies[data.characterId] || 0) + 1;
+          // If negative traits used, award +1 cookie PER negative trait!
+          if (negativeTraits.length > 0) {
+            this.state.cookies[data.characterId] =
+              (this.state.cookies[data.characterId] || 0) + negativeTraits.length;
           }
 
           // Roll d6 dice
@@ -195,7 +204,7 @@ export default class GameRoom implements Party.Server {
             if (val === 6) {
               criticalCount++;
             }
-            if (val === 1 && data.negativeTraitUsed) {
+            if (val === 1 && negativeTraits.length > 0) {
               complicationCount++;
             }
           }
@@ -209,8 +218,10 @@ export default class GameRoom implements Party.Server {
             statKey: data.statKey,
             statName: data.statName,
             statValue: data.statValue,
-            specialtyUsed: data.specialtyUsed,
-            negativeTraitUsed: data.negativeTraitUsed,
+            specialtyUsed: specialties.join(", ") || null,
+            specialtiesUsed: specialties,
+            negativeTraitUsed: negativeTraits.join(", ") || null,
+            negativeTraitsUsed: negativeTraits,
             spentCookie: data.spentCookie,
             diceCount: count,
             rolls,

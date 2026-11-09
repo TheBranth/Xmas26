@@ -56,7 +56,9 @@ interface GameContextType {
     statName: string;
     statValue: number;
     specialtyUsed?: string | null;
+    specialtiesUsed?: string[];
     negativeTraitUsed?: string | null;
+    negativeTraitsUsed?: string[];
     spentCookie: boolean;
   }) => void;
   drawBelt: (customItem?: string) => void;
@@ -262,7 +264,9 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     statName: string;
     statValue: number;
     specialtyUsed?: string | null;
+    specialtiesUsed?: string[];
     negativeTraitUsed?: string | null;
+    negativeTraitsUsed?: string[];
     spentCookie: boolean;
   }) => {
     send({

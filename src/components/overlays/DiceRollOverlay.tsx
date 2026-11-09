@@ -45,16 +45,36 @@ export function DiceRollOverlay({ roll, onClose }: Props) {
 
           {/* Modifiers Used */}
           <div className="flex flex-wrap gap-1.5 justify-center mb-5">
-            {roll.specialtyUsed && (
+            {roll.specialtiesUsed && roll.specialtiesUsed.length > 0 ? (
+              roll.specialtiesUsed.map((spec) => (
+                <span
+                  key={spec}
+                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50"
+                >
+                  ✨ Specialità: {spec} (+1d6)
+                </span>
+              ))
+            ) : roll.specialtyUsed ? (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/50">
                 ✨ Specialità: {roll.specialtyUsed} (+1d6)
               </span>
-            )}
-            {roll.negativeTraitUsed && (
+            ) : null}
+
+            {roll.negativeTraitsUsed && roll.negativeTraitsUsed.length > 0 ? (
+              roll.negativeTraitsUsed.map((neg) => (
+                <span
+                  key={neg}
+                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700/50"
+                >
+                  ⚠️ Malus: {neg} (-1d6, +1 Biscotto!)
+                </span>
+              ))
+            ) : roll.negativeTraitUsed ? (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-950 text-rose-300 border border-rose-700/50">
                 ⚠️ Malus: {roll.negativeTraitUsed} (-1d6, +1 Biscotto!)
               </span>
-            )}
+            ) : null}
+
             {roll.spentCookie && (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/50">
                 🍪 Biscotto del Cringe (+1d6)

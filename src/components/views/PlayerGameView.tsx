@@ -32,15 +32,26 @@ export function PlayerGameView() {
 
   // Selected dice roll configuration state
   const [selectedStat, setSelectedStat] = useState<StatKey>("muscoli");
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
-  const [selectedNegativeTrait, setSelectedNegativeTrait] = useState<string | null>(null);
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [selectedNegativeTraits, setSelectedNegativeTraits] = useState<string[]>([]);
   const [spendCookie, setSpendCookie] = useState<boolean>(false);
+
+  const toggleSpecialty = (spec: string) => {
+    setSelectedSpecialties((prev) =>
+      prev.includes(spec) ? prev.filter((s) => s !== spec) : [...prev, spec]
+    );
+  };
+
+  const toggleNegativeTrait = (neg: string) => {
+    setSelectedNegativeTraits((prev) =>
+      prev.includes(neg) ? prev.filter((n) => n !== neg) : [...prev, neg]
+    );
+  };
 
   // Compute Dice Pool
   const baseStatValue = character.stats[selectedStat];
-  let calculatedDice = baseStatValue;
-  if (selectedSpecialty) calculatedDice += 1;
-  if (selectedNegativeTrait) calculatedDice -= 1;
+  let calculatedDice =
+    baseStatValue + selectedSpecialties.length - selectedNegativeTraits.length;
   if (spendCookie && myCookies > 0) calculatedDice += 1;
   const finalDiceCount = Math.max(1, calculatedDice);
 
@@ -51,14 +62,16 @@ export function PlayerGameView() {
       statKey: selectedStat,
       statName: STAT_LABELS[selectedStat]?.label || selectedStat,
       statValue: baseStatValue,
-      specialtyUsed: selectedSpecialty,
-      negativeTraitUsed: selectedNegativeTrait,
+      specialtyUsed: selectedSpecialties.join(", ") || null,
+      specialtiesUsed: selectedSpecialties,
+      negativeTraitUsed: selectedNegativeTraits.join(", ") || null,
+      negativeTraitsUsed: selectedNegativeTraits,
       spentCookie: spendCookie && myCookies > 0,
     });
 
     // Reset temporary roll modifiers after throwing
-    setSelectedSpecialty(null);
-    setSelectedNegativeTrait(null);
+    setSelectedSpecialties([]);
+    setSelectedNegativeTraits([]);
     setSpendCookie(false);
   };
 
@@ -170,64 +183,66 @@ export function PlayerGameView() {
           </div>
         </div>
 
-        {/* Specialità Tag (+1d6) */}
+        {/* Specialità Tag (+1d6 ciascuna) */}
         <div className="mt-2">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> Specialità (+1d6):
+              <Sparkles className="w-3 h-3" /> Specialità (+1d6 cad.):
             </span>
-            {selectedSpecialty && (
-              <span className="text-[10px] font-bold text-emerald-300">+1d6 applicato</span>
+            {selectedSpecialties.length > 0 && (
+              <span className="text-[10px] font-bold text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40">
+                +{selectedSpecialties.length}d6 {selectedSpecialties.length === 1 ? "applicato" : "applicati"}
+              </span>
             )}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {character.specialties.map((spec) => {
-              const isSelected = selectedSpecialty === spec;
+              const isSelected = selectedSpecialties.includes(spec);
               return (
                 <button
                   key={spec}
                   type="button"
-                  onClick={() => setSelectedSpecialty(isSelected ? null : spec)}
+                  onClick={() => toggleSpecialty(spec)}
                   className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
                     isSelected
                       ? "bg-emerald-600 text-white border-emerald-300 shadow ring-1 ring-emerald-400 scale-[1.02]"
                       : "bg-stone-900 text-stone-300 border-stone-700/60 hover:border-emerald-500/50"
                   }`}
                 >
-                  {spec} {isSelected ? "✓" : "+1d6"}
+                  {spec} {isSelected ? "✓ (+1d6)" : "+1d6"}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* Tratti Negativi Tag (-1d6, Guadagna 1 Biscotto) */}
+        {/* Tratti Negativi Tag (-1d6, Guadagna 1 Biscotto cad.) */}
         <div className="mt-2">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] uppercase font-bold tracking-wider text-rose-400 flex items-center gap-1">
-              <AlertTriangle className="w-3 h-3" /> Tratti Negativi (-1d6):
+              <AlertTriangle className="w-3 h-3" /> Tratti Negativi (-1d6 cad.):
             </span>
-            {selectedNegativeTrait && (
+            {selectedNegativeTraits.length > 0 && (
               <span className="text-[10px] font-bold text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-full border border-amber-600/50 animate-pulse flex items-center gap-1">
-                🍪 Guadagni 1 Biscotto!
+                🍪 +{selectedNegativeTraits.length} Biscott{selectedNegativeTraits.length > 1 ? "i" : "o"}! (-{selectedNegativeTraits.length}d6)
               </span>
             )}
           </div>
           <div className="flex flex-wrap gap-1.5">
             {character.negativeTraits.map((neg) => {
-              const isSelected = selectedNegativeTrait === neg;
+              const isSelected = selectedNegativeTraits.includes(neg);
               return (
                 <button
                   key={neg}
                   type="button"
-                  onClick={() => setSelectedNegativeTrait(isSelected ? null : neg)}
+                  onClick={() => toggleNegativeTrait(neg)}
                   className={`text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all ${
                     isSelected
                       ? "bg-rose-700 text-white border-rose-300 shadow ring-1 ring-rose-400 scale-[1.02]"
                       : "bg-stone-900 text-stone-300 border-stone-700/60 hover:border-rose-500/50"
                   }`}
                 >
-                  {neg} {isSelected ? "⚠️" : "-1d6"}
+                  {neg} {isSelected ? "⚠️ (-1d6)" : "-1d6"}
                 </button>
               );
             })}
