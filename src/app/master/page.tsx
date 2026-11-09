@@ -12,18 +12,21 @@ const VALID_PASSWORDS = ["imodium", "avernus", "natale26", "babbo"];
 
 function MasterGate() {
   const { state, setIsMaster, clearOverlays } = useGame();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return sessionStorage.getItem("ons_master_auth") === "true";
-  });
+  const [mounted, setMounted] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setIsMaster(true);
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      const stored = sessionStorage.getItem("ons_master_auth");
+      if (stored === "true") {
+        setIsAuthenticated(true);
+        setIsMaster(true);
+      }
     }
-  }, [isAuthenticated, setIsMaster]);
+  }, [setIsMaster]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +42,14 @@ function MasterGate() {
       setError(true);
     }
   };
+
+  if (!mounted) {
+    return (
+      <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col items-center justify-center p-4">
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
+      </main>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
