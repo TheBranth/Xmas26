@@ -134,6 +134,18 @@ export function MasterDashboard() {
                 </span>
               </div>
             </div>
+
+            {/* Active Scene GM Prontuario */}
+            {activeScene.gmNotes && (
+              <div className="mt-3 p-3 rounded-2xl bg-amber-950/40 border border-amber-600/40 text-left shadow-inner">
+                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 flex items-center gap-1 mb-1">
+                  <Sparkles className="w-3 h-3 text-amber-400" /> Prontuario Regia Scena Attiva
+                </span>
+                <p className="text-xs text-amber-100/90 leading-relaxed">
+                  {activeScene.gmNotes}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Attiva Cintura di Babbo Natale Action */}
@@ -329,6 +341,16 @@ export function MasterDashboard() {
                           <p className="text-[10px] text-stone-400 mt-1 line-clamp-2 italic">
                             &ldquo;{scene.silhouetteNote}&rdquo;
                           </p>
+
+                          {/* GM Prontuario note */}
+                          {scene.gmNotes && (
+                            <div className="mt-2.5 p-2 rounded-xl bg-stone-900/90 border border-stone-800 text-[11px] text-stone-300 leading-relaxed group-hover:border-amber-700/50 transition">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-0.5">
+                                📖 Guida Regia:
+                              </span>
+                              <p className="line-clamp-3">{scene.gmNotes}</p>
+                            </div>
+                          )}
                         </div>
                       </button>
                     );

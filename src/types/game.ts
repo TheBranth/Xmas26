@@ -33,6 +33,7 @@ export interface GameScene {
   title: string; // Titolo visibile a tutti
   imagePath: string; // Percorso file asset
   silhouetteNote: string; // Prompt per le silhouette scure in controluce
+  gmNotes?: string; // Prontuario narrativo per il Master (cosa succede, minacce, obiettivi, spunti)
 }
 
 export interface CustomSceneData {

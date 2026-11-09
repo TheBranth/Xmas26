@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useSyncExternalStore } from "react";
 import { GameProvider, useGame } from "@/context/GameContext";
 import { MasterDashboard } from "@/components/views/MasterDashboard";
 import { DiceRollOverlay } from "@/components/overlays/DiceRollOverlay";
@@ -10,40 +10,57 @@ import Link from "next/link";
 
 const VALID_PASSWORDS = ["imodium", "avernus", "natale26", "babbo"];
 
+const emptySubscribe = () => () => {};
+function useIsClient() {
+  return useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+}
+
+function useSessionMasterAuth() {
+  return useSyncExternalStore(
+    (callback) => {
+      window.addEventListener("storage", callback);
+      return () => window.removeEventListener("storage", callback);
+    },
+    () => (typeof window !== "undefined" ? sessionStorage.getItem("ons_master_auth") === "true" : false),
+    () => false
+  );
+}
+
 function MasterGate() {
   const { state, setIsMaster, clearOverlays } = useGame();
-  const [mounted, setMounted] = useState<boolean>(false);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const isClient = useIsClient();
+  const isSessionAuth = useSessionMasterAuth();
+  const [unlockedNow, setUnlockedNow] = useState<boolean>(false);
+  const isAuthenticated = isSessionAuth || unlockedNow;
+
   const [password, setPassword] = useState("");
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("ons_master_auth");
-      if (stored === "true") {
-        setIsAuthenticated(true);
-        setIsMaster(true);
-      }
+    if (isAuthenticated) {
+      setIsMaster(true);
     }
-  }, [setIsMaster]);
+  }, [isAuthenticated, setIsMaster]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     const clean = password.trim().toLowerCase();
     if (VALID_PASSWORDS.includes(clean)) {
-      setIsAuthenticated(true);
-      setIsMaster(true);
-      setError(false);
       if (typeof window !== "undefined") {
         sessionStorage.setItem("ons_master_auth", "true");
       }
+      setUnlockedNow(true);
+      setError(false);
     } else {
       setError(true);
     }
   };
 
-  if (!mounted) {
+  if (!isClient) {
     return (
       <main className="min-h-screen bg-stone-950 text-stone-100 flex flex-col items-center justify-center p-4">
         <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
