@@ -101,7 +101,22 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!playerId) return;
 
-    const host = process.env.NEXT_PUBLIC_PARTYKIT_HOST || "localhost:1999";
+    const envHost = process.env.NEXT_PUBLIC_PARTYKIT_HOST;
+    const isLocalhost =
+      typeof window !== "undefined" &&
+      (window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1");
+
+    // Only connect to localhost if we are running locally, otherwise require NEXT_PUBLIC_PARTYKIT_HOST
+    const host = envHost || (isLocalhost ? "localhost:1999" : null);
+
+    if (!host) {
+      // Running on a public domain without a remote websocket host configured:
+      // skip localhost probes to prevent Chrome Private Network Access warnings
+      setConnectionStatus("disconnected");
+      return;
+    }
+
     const room = "ons-room-main";
 
     try {
